@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Counting Down to Ammu's Birthday 🌙</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;700&display=swap');
+
+:root{
+  --night-deep: #100a2e;
+  --night: #1b1147;
+  --night-soft: #2a1a63;
+  --blush: #ffb3c6;
+  --lavender: #b892f0;
+  --gold: #f4c869;
+  --cream: #fff6ec;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html,body{
+  height:100%;
+  background:
+    radial-gradient(ellipse 50% 35% at 80% 12%, rgba(244,200,105,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 20% 85%, rgba(184,146,240,0.22) 0%, transparent 65%),
+    radial-gradient(ellipse at 50% -10%, var(--night-soft) 0%, var(--night) 45%, var(--night-deep) 100%);
+  color: var(--cream);
+  font-family:'Manrope', sans-serif;
+  overflow:hidden;
+}
+
+/* ---------- night sky backdrop: stars + moon + petals ---------- */
+#bg-layer{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.moon{
+  position:absolute; top:6%; right:10%;
+  width:90px; height:90px; border-radius:50%;
+  background: radial-gradient(circle at 35% 35%, #fff9e8, var(--gold) 70%);
+  box-shadow: 0 0 60px rgba(244,200,105,0.55), 0 0 120px rgba(244,200,105,0.25);
+  opacity:0.9;
+}
+.star{
+  position:absolute;
+  color: var(--cream);
+  animation: twinkle ease-in-out infinite;
+}
+@keyframes twinkle{
+  0%,100%{ opacity:0.15; transform:scale(0.9); }
+  50%{ opacity:1; transform:scale(1.15); }
+}
+.petal{
+  position:absolute;
+  font-size: 20px;
+  opacity:0.7;
+  animation: petal-fall linear infinite;
+}
+@keyframes petal-fall{
+  0%{ transform: translateY(-10vh) translateX(0) rotate(0deg); }
+  100%{ transform: translateY(110vh) translateX(30px) rotate(360deg); }
+}
+
+/* ---------- layout shell ---------- */
+.stage{
+  position:relative; z-index:2;
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  padding: 8vh 6vw;
+}
+.screen{ display:none; width:100%; }
+.screen.active{ display:flex; justify-content:center; }
+.screen.active .card{ animation: pop-in .55s cubic-bezier(.26,1.4,.44,1); }
+@keyframes pop-in{
+  0%{ opacity:0; transform: scale(0.7); }
+  70%{ opacity:1; transform: scale(1.05); }
+  100%{ opacity:1; transform: scale(1); }
+}
+.open-icon{
+  font-size: 60px;
+  margin-bottom: 20px;
+  animation: icon-bob 2.4s ease-in-out infinite;
+}
+@keyframes icon-bob{
+  0%,100%{ transform: translateY(0) rotate(0deg); }
+  50%{ transform: translateY(-8px) rotate(-4deg); }
+}
+.envelope-btn{
+  appearance:none; border:none; cursor:pointer;
+  font-family:'Manrope', sans-serif; font-weight:700; font-size:15px;
+  padding:18px 40px; border-radius:100px;
+  background: linear-gradient(120deg, var(--blush), var(--gold));
+  color: #2a1a4a;
+  transition: transform .18s ease, box-shadow .18s ease;
+  box-shadow: 0 12px 30px rgba(244,200,105,0.3);
+}
+.envelope-btn::before{ content:"✨"; margin-right:8px; }
+.envelope-btn:hover{ transform: translateY(-3px) scale(1.03); box-shadow:0 18px 40px rgba(244,200,105,0.4); }
+
+/* burst particle when opening */
+.burst-emoji{
+  position:fixed;
+  z-index:60;
+  pointer-events:none;
+  left:50%; top:50%;
+  font-size: 26px;
+  animation: burst-fly 1000ms ease-out forwards;
+}
+@keyframes burst-fly{
+  0%{ transform: translate(-50%,-50%) scale(0.3); opacity:1; }
+  100%{ transform: translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(1.1); opacity:0; }
+}
+.card{
+  width:100%; max-width:600px;
+  background: rgba(27,17,71,0.55);
+  border: 1px solid rgba(244,200,105,0.28);
+  backdrop-filter: blur(14px);
+  border-radius: 26px;
+  padding: 50px 40px;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.5);
+  text-align:center;
+  position:relative;
+}
+.card::before{
+  content:"";
+  position:absolute; inset:-1px;
+  border-radius:26px;
+  padding:1px;
+  background: linear-gradient(120deg, rgba(244,200,105,0.8), rgba(184,146,240,0.55), rgba(255,179,198,0.55), rgba(244,200,105,0.8));
+  background-size:220% 220%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: shimmer-border 8s linear infinite;
+  pointer-events:none;
+}
+@keyframes shimmer-border{
+  0%{ background-position:0% 50%; }
+  100%{ background-position:220% 50%; }
+}
+
+.crest{
+  font-size:11px; letter-spacing:0.4em; text-transform:uppercase;
+  color: var(--gold); opacity:0.85; margin-bottom:16px; font-weight:700;
+}
+h1{
+  font-family:'Cormorant Garamond', serif;
+  font-weight:600;
+  font-size: clamp(28px, 6vw, 42px);
+  line-height:1.2;
+  color: var(--cream);
+  margin-bottom:10px;
+}
+h1 em{
+  font-style:normal;
+  background: linear-gradient(120deg, var(--blush), var(--lavender), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+p.lead{
+  font-size:15px; line-height:1.6; color: rgba(255,246,236,0.75);
+  max-width: 420px; margin: 0 auto 30px;
+}
+
+/* countdown */
+.countdown{
+  display:flex; justify-content:center; gap:14px; margin: 10px 0 30px; flex-wrap:wrap;
+}
+.count-box{
+  background: rgba(255,246,236,0.06);
+  border: 1px solid rgba(244,200,105,0.3);
+  border-radius:16px;
+  padding: 16px 14px;
+  min-width: 78px;
+}
+.count-num{
+  font-family:'Cormorant Garamond', serif;
+  font-weight:700;
+  font-size: clamp(30px, 6vw, 42px);
+  line-height:1;
+  background: linear-gradient(120deg, var(--gold), var(--blush));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.count-label{
+  font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase;
+  color: rgba(255,246,236,0.65); margin-top:6px;
+}
+
+.target-date{
+  font-size:13px; color: var(--lavender); letter-spacing:0.05em; margin-bottom: 6px;
+}
+
+.wish-text{
+  font-family:'Cormorant Garamond', serif;
+  font-size: clamp(18px, 3.4vw, 22px);
+  color: rgba(255,246,236,0.9);
+  line-height:1.5;
+  font-style:italic;
+  margin-top: 6px;
+}
+
+/* tap glow */
+.tap-heart{
+  position:fixed;
+  z-index:50;
+  pointer-events:none;
+  font-size: 20px;
+  color: var(--blush);
+  text-shadow: 0 0 10px var(--blush), 0 0 22px rgba(184,146,240,0.9), 0 0 34px rgba(244,200,105,0.6);
+  animation: tap-glow 900ms ease-out forwards;
+}
+@keyframes tap-glow{
+  0%{ transform: translate(-50%,-50%) scale(0.4); opacity:0; }
+  15%{ opacity:1; }
+  100%{ transform: translate(-50%,-50%) translateY(-70px) scale(1.3); opacity:0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .star, .petal{ animation:none; opacity:0.3; }
+  .tap-heart{ animation:none; opacity:0; }
+}
+</style>
+</head>
+<body>
+
+<div id="bg-layer"></div>
+
+<div class="stage">
+
+  <!-- SCREEN 1: click to open -->
+  <div class="screen active" data-screen="open">
+    <div class="card">
+      <div class="crest">✦ Elite Love ✦</div>
+      <div class="open-icon">🎁</div>
+      <h1>A little countdown<br>for <em>Ammu</em></h1>
+      <p class="lead">Click below to open it.</p>
+      <button class="envelope-btn" id="open-btn">Click to open</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: the countdown reveal -->
+  <div class="screen" data-screen="wish">
+    <div class="card">
+      <div class="crest">✦ Elite Love ✦</div>
+      <div class="target-date" id="target-date-label">Counting down to 18 August 2026</div>
+      <h1>Advance Happy Birthday,<br><em>Ammu</em> 🌙</h1>
+      <p class="lead">Every second between now and your day is one I spend looking forward to it.</p>
+
+      <div class="countdown">
+        <div class="count-box"><div class="count-num" id="days">00</div><div class="count-label">Days</div></div>
+        <div class="count-box"><div class="count-num" id="hours">00</div><div class="count-label">Hours</div></div>
+        <div class="count-box"><div class="count-num" id="minutes">00</div><div class="count-label">Minutes</div></div>
+        <div class="count-box"><div class="count-num" id="seconds">00</div><div class="count-label">Seconds</div></div>
+      </div>
+
+      <div class="wish-text" id="wish-text">"Wishing you all the love in the world — a little early, but every bit as true."</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   EDIT HERE TO PERSONALIZE
+   ============================================================ */
+const TARGET_DATE = "2026-08-18T00:00:00"; // her birthday
+const WISH_TEXT = "\"Wishing you all the love in the world — a little early, but every bit as true.\"";
+
+/* ============================================================
+   NO NEED TO EDIT BELOW
+   ============================================================ */
+
+document.getElementById('wish-text').textContent = WISH_TEXT;
+
+document.getElementById('open-btn').addEventListener('click', () => {
+  spawnBurst();
+  document.querySelector('[data-screen="open"]').classList.remove('active');
+  setTimeout(() => {
+    document.querySelector('[data-screen="wish"]').classList.add('active');
+  }, 150);
+});
+
+const burstEmojis = ['🌸','🌷','💮','♥','💗','✨'];
+function spawnBurst() {
+  const count = 22;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'burst-emoji';
+    el.textContent = burstEmojis[Math.floor(Math.random() * burstEmojis.length)];
+    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+    const distance = 120 + Math.random() * 140;
+    const bx = Math.cos(angle) * distance;
+    const by = Math.sin(angle) * distance;
+    el.style.setProperty('--bx', bx + 'px');
+    el.style.setProperty('--by', by + 'px');
+    el.style.fontSize = (18 + Math.random() * 14) + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1050);
+  }
+}
+
+const target = new Date(TARGET_DATE).getTime();
+
+function updateCountdown() {
+  const now = new Date().getTime();
+  const diff = target - now;
+
+  if (diff <= 0) {
+    document.querySelector('.countdown').innerHTML = '';
+    document.querySelector('.lead').textContent = "Today's the day!";
+    document.querySelector('h1').innerHTML = 'Happy Birthday,<br><em>Ammu</em> 🎉';
+    clearInterval(timerInterval);
+    return;
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  document.getElementById('days').textContent = String(days).padStart(2, '0');
+  document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+  document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+  document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+}
+
+updateCountdown();
+const timerInterval = setInterval(updateCountdown, 1000);
+
+/* tap heart-glow anywhere */
+const heartChoices = ['♥','✨','🌙','💫'];
+function spawnTapHeart(x, y) {
+  const h = document.createElement('div');
+  h.className = 'tap-heart';
+  h.textContent = heartChoices[Math.floor(Math.random() * heartChoices.length)];
+  h.style.left = x + 'px';
+  h.style.top = y + 'px';
+  h.style.fontSize = (16 + Math.random() * 14) + 'px';
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 950);
+}
+window.addEventListener('pointerdown', (e) => {
+  spawnTapHeart(e.clientX, e.clientY);
+});
+
+/* moon + twinkling stars + falling petals */
+const bgLayer = document.getElementById('bg-layer');
+
+const moon = document.createElement('div');
+moon.className = 'moon';
+bgLayer.appendChild(moon);
+
+for (let i = 0; i < 40; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.textContent = ['✦','✧','⋆','·'][i % 4];
+  s.style.left = Math.random() * 98 + 'vw';
+  s.style.top = Math.random() * 70 + 'vh';
+  s.style.fontSize = (8 + Math.random() * 10) + 'px';
+  s.style.animationDuration = (2 + Math.random() * 3) + 's';
+  s.style.animationDelay = (Math.random() * 3) + 's';
+  bgLayer.appendChild(s);
+}
+
+const petalEmojis = ['🌸','🌷','💮'];
+for (let i = 0; i < 14; i++) {
+  const p = document.createElement('div');
+  p.className = 'petal';
+  p.textContent = petalEmojis[i % petalEmojis.length];
+  p.style.left = Math.random() * 96 + 'vw';
+  p.style.fontSize = (14 + Math.random() * 14) + 'px';
+  p.style.animationDuration = (12 + Math.random() * 14) + 's';
+  p.style.animationDelay = (Math.random() * -25) + 's';
+  bgLayer.appendChild(p);
+}
+</script>
+</body>
+</html>
